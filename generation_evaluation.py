@@ -23,6 +23,8 @@ import argparse
 # You should save the generated images to the gen_data_dir, which is fixed as 'samples'
 sample_op = lambda x : sample_from_discretized_mix_logistic(x, 5)
 def my_sample(model, gen_data_dir, sample_batch_size = 25, obs = (3,32,32), sample_op = sample_op):
+
+    #I am so sad
     for label in my_bidict:
         print(f"Label: {label}")
         #generate images for each label, each label has 25 images
