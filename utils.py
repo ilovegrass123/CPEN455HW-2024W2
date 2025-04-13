@@ -187,6 +187,17 @@ def sample(model, sample_batch_size, obs, sample_op):
                 data[:, :, i, j] = out_sample.data[:, :, i, j]
     return data
 
+def sample_conditional(model, sample_batch_size, obs, sample_op, labels): # keeping the or iginal sample function just in case
+    out = torch.zeros(sample_batch_size, *obs, """device=device """)
+
+    for row in range(obs[1]):
+        for col in range(obs[2]):
+            m = model(out, labels=labels, sample=True)
+            out[:,:,row,col] = sample_op(out[:,:,row,col])
+
+    return out
+            
+
 class mean_tracker:
     def __init__(self):
         self.sum = 0

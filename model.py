@@ -1,5 +1,6 @@
 import torch.nn as nn
 from layers import *
+from dataset import my_bidict
 
 
 class PixelCNNLayer_up(nn.Module):
@@ -51,8 +52,7 @@ class PixelCNNLayer_down(nn.Module):
 
 
 class PixelCNN(nn.Module):
-    def __init__(self, nr_resnet=5, nr_filters=80, nr_logistic_mix=10,
-                    resnet_nonlinearity='concat_elu', input_channels=3):
+    def __init__(self, nr_resnet=5, nr_filters=80, nr_logistic_mix=10, resnet_nonlinearity='concat_elu', input_channels=3, num_classes=4):
         super(PixelCNN, self).__init__()
         if resnet_nonlinearity == 'concat_elu' :
             self.resnet_nonlinearity = lambda x : concat_elu(x)
@@ -64,6 +64,8 @@ class PixelCNN(nn.Module):
         self.nr_logistic_mix = nr_logistic_mix
         self.right_shift_pad = nn.ZeroPad2d((1, 0, 0, 0))
         self.down_shift_pad  = nn.ZeroPad2d((0, 0, 1, 0))
+        self.num_classes = num_classes
+        self.label_embeddings = nn.Embedding(self.num_classes, nr_filters)
 
         down_nr_resnet = [nr_resnet] + [nr_resnet + 1] * 2
         self.down_layers = nn.ModuleList([PixelCNNLayer_down(down_nr_resnet[i], nr_filters,
@@ -97,7 +99,8 @@ class PixelCNN(nn.Module):
         self.init_padding = None
 
 
-    def forward(self, x, sample=False):
+    def forward(self, x, sample=False, labels=None):
+
         # similar as done in the tf repo :
         if self.init_padding is not sample:
             xs = [int(y) for y in x.size()]
@@ -109,6 +112,20 @@ class PixelCNN(nn.Module):
             padding = Variable(torch.ones(xs[0], 1, xs[2], xs[3]), requires_grad=False)
             padding = padding.cuda() if x.is_cuda else padding
             x = torch.cat((x, padding), 1)
+
+
+        ### ADDED BY AN IDIOT (ME) ###
+
+
+        embeddings = self.label_embeddings.view(embeddings.size(0), embeddings.size(1), 1, 1)
+
+        uuuuuuuu = self.u_init(x)
+        lululul = self.ul_init[0](x) + self.ul_init[1](x)
+
+
+
+        ### IDIOT CODE DONE (ME) ###
+
 
         ###      UP PASS    ###
         x = x if sample else torch.cat((x, self.init_padding), 1)
