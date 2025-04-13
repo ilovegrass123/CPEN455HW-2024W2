@@ -24,7 +24,13 @@ NUM_CLASSES = len(my_bidict)
 def get_label(model, model_input, device):
     # Write your code here, replace the random classifier with your trained model
     # and return the predicted label, which is a tensor of shape (batch_size,)
-    answer = model(model_input, device)
+    model.eval()
+    model_input = model_input.to(device)
+
+    with torch.no_grad():
+        logits = model(model_input)
+
+    answer = torch.argmax(logits, dim=1)
     return answer
 # End of your code
 
@@ -68,7 +74,8 @@ if __name__ == '__main__':
 
     #TODO:Begin of your code
     #You should replace the random classifier with your trained model
-    model = random_classifier(NUM_CLASSES)
+    model = PixelCNN().to(device)
+    model.load_state_dict(torch.load("weight.pth"))
     #End of your code
     
     model = model.to(device)
