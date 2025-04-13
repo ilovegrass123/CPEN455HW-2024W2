@@ -242,6 +242,7 @@ if __name__ == '__main__':
                             "FID": fid_score})
         
         if (epoch + 1) % args.save_interval == 0: 
+            print("saved a model")
             if not os.path.exists("models"):
                 os.makedirs("models")
             torch.save(model.state_dict(), 'models/{}_{}.pth'.format(model_name, epoch))
