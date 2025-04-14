@@ -17,12 +17,12 @@ class PixelCNNLayer_up(nn.Module):
                                         resnet_nonlinearity, skip_connection=1)
                                             for _ in range(nr_resnet)])
 
-    def forward(self, u, ul):
+    def forward(self, u, ul, g=None, b=None):
         u_list, ul_list = [], []
 
         for i in range(self.nr_resnet):
-            u  = self.u_stream[i](u)
-            ul = self.ul_stream[i](ul, a=u)
+            u  = self.u_stream[i](u, g=g, b=b)
+            ul = self.ul_stream[i](ul, a=u, g=g, b=b)
             u_list  += [u]
             ul_list += [ul]
 
@@ -43,10 +43,10 @@ class PixelCNNLayer_down(nn.Module):
                                         resnet_nonlinearity, skip_connection=2)
                                             for _ in range(nr_resnet)])
 
-    def forward(self, u, ul, u_list, ul_list):
+    def forward(self, u, ul, u_list, ul_list, g=None, b=None):
         for i in range(self.nr_resnet):
-            u  = self.u_stream[i](u, a=u_list.pop())
-            ul = self.ul_stream[i](ul, a=torch.cat((u, ul_list.pop()), 1))
+            u  = self.u_stream[i](u, a=u_list.pop(), g=g, b=b)
+            ul = self.ul_stream[i](ul, a=torch.cat((u, ul_list.pop()), 1), b=b ,g=g)
 
         return u, ul
 
@@ -66,6 +66,7 @@ class PixelCNN(nn.Module):
         self.down_shift_pad  = nn.ZeroPad2d((0, 0, 1, 0))
         self.num_classes = num_classes
         self.label_embeddings = nn.Embedding(self.num_classes, nr_filters)
+        self.filmer = FiLM(self.label_embeddings, nr_filters)
 
         down_nr_resnet = [nr_resnet] + [nr_resnet + 1] * 2
         self.down_layers = nn.ModuleList([PixelCNNLayer_down(down_nr_resnet[i], nr_filters,
@@ -107,17 +108,19 @@ class PixelCNN(nn.Module):
             padding = Variable(torch.ones(xs[0], 1, xs[2], xs[3]), requires_grad=False)
             self.init_padding = padding.cuda() if x.is_cuda else padding
 
-        if sample :
+        if sample:
             xs = [int(y) for y in x.size()]
             padding = Variable(torch.ones(xs[0], 1, xs[2], xs[3]), requires_grad=False)
             padding = padding.cuda() if x.is_cuda else padding
             x = torch.cat((x, padding), 1)
 
 
+
         ### ADDED BY AN IDIOT (ME) ###
 
-
         embeddings = self.label_embeddings.view(embeddings.size(0), embeddings.size(1), 1, 1)
+
+        g,b = self.filmer(embeddings)
 
         uuuuuuuu = self.u_init(x)
         lululul = self.ul_init[0](x) + self.ul_init[1](x)
@@ -133,7 +136,7 @@ class PixelCNN(nn.Module):
         ul_list = [self.ul_init[0](x) + self.ul_init[1](x)]
         for i in range(3):
             # resnet block
-            u_out, ul_out = self.up_layers[i](u_list[-1], ul_list[-1])
+            u_out, ul_out = self.up_layers[i](u_list[-1], ul_list[-1], g=g, b=b)
             u_list  += u_out
             ul_list += ul_out
 
@@ -148,10 +151,10 @@ class PixelCNN(nn.Module):
 
         for i in range(3):
             # resnet block
-            u, ul = self.down_layers[i](u, ul, u_list, ul_list)
+            u, ul = self.down_layers[i](u, ul, u_list, ul_list, g=g, b=b)
 
             # upscale (only twice)
-            if i != 2 :
+            if i != 2:
                 u  = self.upsize_u_stream[i](u)
                 ul = self.upsize_ul_stream[i](ul)
 
