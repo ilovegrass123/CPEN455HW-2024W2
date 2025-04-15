@@ -122,11 +122,6 @@ class PixelCNN(nn.Module):
 
         g,b = self.filmer(embeddings)
 
-        uuuuuuuu = self.u_init(x)
-        lululul = self.ul_init[0](x) + self.ul_init[1](x)
-
-
-
         ### IDIOT CODE DONE (ME) ###
 
 
