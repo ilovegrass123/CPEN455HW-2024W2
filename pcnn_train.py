@@ -189,7 +189,7 @@ if __name__ == '__main__':
         print('model parameters loaded')
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=args.lr_decay)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=args.lr_decay)
     
     for epoch in tqdm(range(args.max_epochs)):
         train_or_test(model = model, 
