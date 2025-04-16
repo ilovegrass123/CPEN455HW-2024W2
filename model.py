@@ -117,14 +117,17 @@ class PixelCNN(nn.Module):
 
 
         ### ADDED BY AN IDIOT (ME) ###
-
-        if labels is not None:
-            labels = [my_bidict[label] for label in labels]
-            embeddings = self.label_embeddings(torch.tensor(labels).to(x.device))
-            g,b = self.filmer(embeddings)
-        else:
-            g,b = None, None
-
+        usable_labels = []
+        for label in labels:
+            try:
+                usable_labels.append(my_bidict[label])
+            except KeyError:
+                continue
+            if len(usable_labels) != 0:
+                embeddings = self.label_embeddings(torch.tensor(labels).to(x.device))
+                g,b = self.filmer(embeddings)
+            else:
+                g, b = None, None
         ### IDIOT CODE DONE (ME) ###
 
 
