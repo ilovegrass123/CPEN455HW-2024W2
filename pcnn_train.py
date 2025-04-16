@@ -33,7 +33,7 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
             
         lab = torch.tensor(labels).to(device)
         model_in = model_in.to(device)
-        model_output = model(model_in, labels=labels)
+        model_output = model(model_in, labels=lab)
         loss = loss_op(model_in, model_output)
         loss_tracker.update(loss.item()/deno)
         if mode == 'training':
