@@ -34,15 +34,16 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
             if label in my_bidict:
                 lab.append(my_bidict[label])
         
-        lab = torch.tensor(lab).long().to(device)
-        model_in = model_in.to(device)
-        model_output = model(model_in, labels=lab)
-        loss = loss_op(model_in, model_output)
-        loss_tracker.update(loss.item()/deno)
-        if mode == 'training':
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+        if len(lab) != 0:
+            lab = torch.tensor(lab).long().to(device)
+            model_in = model_in.to(device)
+            model_output = model(model_in, labels=lab)
+            loss = loss_op(model_in, model_output)
+            loss_tracker.update(loss.item()/deno)
+            if mode == 'training':
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
         
     if args.en_wandb:
         wandb.log({mode + "-Average-BPD" : loss_tracker.get_mean()})
