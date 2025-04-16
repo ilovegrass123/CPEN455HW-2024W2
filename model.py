@@ -66,7 +66,7 @@ class PixelCNN(nn.Module):
         self.down_shift_pad  = nn.ZeroPad2d((0, 0, 1, 0))
         self.num_classes = num_classes
         self.label_embeddings = nn.Embedding(self.num_classes, embedding_dim=64)
-        self.filmer = FiLM(embed_dimension=64, n_channels=self.input_channels)
+        self.filmer = FiLM(embed_dimension=64, n_channels=self.nr_filters)
 
         down_nr_resnet = [nr_resnet] + [nr_resnet + 1] * 2
         self.down_layers = nn.ModuleList([PixelCNNLayer_down(down_nr_resnet[i], nr_filters,
