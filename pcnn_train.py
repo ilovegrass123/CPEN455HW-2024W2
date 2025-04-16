@@ -31,7 +31,7 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
             if label in my_bidict.keys():
                 lab += [my_bidict[label]]
             
-        lab = torch.tensor(lab).to(device)
+        lab = torch.tensor(lab).long().to(device)
         model_in = model_in.to(device)
         model_output = model(model_in, labels=lab)
         loss = loss_op(model_in, model_output)
