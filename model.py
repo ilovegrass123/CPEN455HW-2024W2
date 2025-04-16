@@ -120,7 +120,7 @@ class PixelCNN(nn.Module):
 
         embeddings = self.label_embeddings.view(embeddings.size(0), embeddings.size(1), 1, 1)
 
-        g,b = self.filmer(embeddings)
+        g,b = self.filmer(self.num_classes, self.input_channels)
 
         ### IDIOT CODE DONE (ME) ###
 
