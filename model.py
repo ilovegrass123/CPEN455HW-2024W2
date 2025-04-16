@@ -118,9 +118,9 @@ class PixelCNN(nn.Module):
 
         ### ADDED BY AN IDIOT (ME) ###
 
-        embeddings = self.label_embeddings.view(embeddings.size(0), embeddings.size(1), 1, 1)
+        # embeddings = self.label_embeddings.view(embeddings.size(0), embeddings.size(1), 1, 1)
 
-        g,b = self.filmer(embeddings)
+        g,b = self.filmer(self.label_embeddings)
 
         ### IDIOT CODE DONE (ME) ###
 
