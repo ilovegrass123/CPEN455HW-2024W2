@@ -33,7 +33,6 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
         for label in labels:
             if label in my_bidict:
                 lab.append(my_bidict[label])
-                print("I made it here a single time")
         
         lab = torch.tensor(lab).long().to(device)
         model_in = model_in.to(device)
