@@ -25,12 +25,10 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
     loss_tracker = mean_tracker()
     
 
-    for batch_idx, (model_in, labels) in enumerate(tqdm(data_loader)):
-        for label in labels:
-            lab = []
-            if label in my_bidict:
-                lab += [my_bidict[label]]
-            
+    for batch_idx, item in enumerate(tqdm(data_loader)):
+
+        model_in, lab = item
+        
         lab = torch.tensor(lab).long().to(device)
         model_in = model_in.to(device)
         model_output = model(model_in, labels=lab)
