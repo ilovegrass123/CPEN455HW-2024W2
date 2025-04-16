@@ -225,11 +225,17 @@ if __name__ == '__main__':
                       mode = 'val')
         
         if epoch % args.sampling_interval == 0:
-            print('......sampling......')
-            sample_t = sample(model, args.sample_batch_size, args.obs, sample_op)
-            sample_t = rescaling_inv(sample_t)
-            save_images(sample_t, args.sample_dir)
-            sample_result = wandb.Image(sample_t, caption="epoch {}".format(epoch))
+            # print('......sampling......')
+            # sample_t = sample(model, args.sample_batch_size, args.obs, sample_op)
+            # sample_t = rescaling_inv(sample_t)
+            # save_images(sample_t, args.sample_dir)
+
+            for label in my_bidict.values():
+                labels = torch.full((args.sample_batch_size,), label, device=device)
+                sample_t = sample_conditional(model, args.sample_batch_size, args.obs, sample_op, labels)
+                sample_t = rescaling_inv(sample_t)
+                save_images(sample_t, os.path.join(args.sample_dir, f"class_{label}"))
+                sample_result = wandb.Image(sample_t, caption="epoch {}".format(epoch))
             
             gen_data_dir = args.sample_dir
             ref_data_dir = args.data_dir +'/test'
