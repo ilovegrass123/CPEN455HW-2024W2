@@ -26,6 +26,8 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
     
 
     for batch_idx, (model_in, labels) in enumerate(tqdm(data_loader)):
+        for label in labels:
+            print(label)
         labels = [my_bidict[label] for label in labels]
         labels = torch.tensor(labels).to(device)
         model_in = model_in.to(device)
