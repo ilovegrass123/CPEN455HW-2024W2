@@ -50,7 +50,7 @@ class CPEN455Dataset(Dataset):
         if image.shape[0] == 1:
             image = replicate_color_channel(image)
         if self.transform:
-          image = self.transform(image)
+            image = self.transform(image)
         return image, category_name
     
     def get_all_images(self, label):

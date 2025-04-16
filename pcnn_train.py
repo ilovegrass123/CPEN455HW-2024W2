@@ -14,6 +14,7 @@ import argparse
 from pytorch_fid.fid_score import calculate_fid_given_paths
 
 
+
 def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, mode = 'training'):
     if mode == 'training':
         model.train()
@@ -23,10 +24,13 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
     deno =  args.batch_size * np.prod(args.obs) * np.log(2.)        
     loss_tracker = mean_tracker()
     
+    labels = torch.tensor([my_bidict[name] for name in my_bidict.keys()])
+    labels = labels.to(device)
+
     for batch_idx, item in enumerate(tqdm(data_loader)):
         model_input, _ = item
         model_input = model_input.to(device)
-        model_output = model(model_input)
+        model_output = model(model_input, labels=labels)
         loss = loss_op(model_input, model_output)
         loss_tracker.update(loss.item()/deno)
         if mode == 'training':
