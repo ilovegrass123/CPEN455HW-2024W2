@@ -124,7 +124,7 @@ class PixelCNN(nn.Module):
             except KeyError:
                 continue
             if len(usable_labels) != 0:
-                embeddings = self.label_embeddings(torch.tensor(labels).to(x.device))
+                embeddings = self.label_embeddings(torch.tensor(usable_labels).to(x.device))
                 g,b = self.filmer(embeddings)
             else:
                 g, b = None, None
