@@ -118,9 +118,10 @@ class PixelCNN(nn.Module):
 
         ### ADDED BY AN IDIOT (ME) ###
 
-        embeddings = self.label_embeddings(torch.tensor(labels))
-
-        g,b = self.filmer(embeddings)
+        if labels is not None:
+            labels = [my_bidict[label] for label in labels]
+            embeddings = self.label_embeddings(torch.tensor(labels))
+            g,b = self.filmer(embeddings)
 
         ### IDIOT CODE DONE (ME) ###
 
