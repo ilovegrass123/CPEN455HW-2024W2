@@ -16,7 +16,8 @@ replicate_color_channel = lambda x : x.repeat(3,1,1)
 my_bidict = bidict({'Class0': 0, 
                     'Class1': 1,
                     'Class2': 2,
-                    'Class3': 3})
+                    'Class3': 3,
+                    'Unknown': -1})
 
 class CPEN455Dataset(Dataset):
     def __init__(self, root_dir = './data', mode='train', transform=None):
