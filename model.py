@@ -118,7 +118,7 @@ class PixelCNN(nn.Module):
 
         ### ADDED BY AN IDIOT (ME) ###
 
-        embeddings = self.label_embeddings(labels.long())
+        embeddings = self.label_embeddings(labels)
 
         g,b = self.filmer(embeddings)
 
