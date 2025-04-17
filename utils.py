@@ -190,10 +190,11 @@ def sample(model, sample_batch_size, obs, sample_op):
 def sample_conditional(model, sample_batch_size, obs, sample_op, labels): # keeping the or iginal sample function just in case
     out = torch.zeros(sample_batch_size, *obs, device=next(model.parameters()).device)
 
-    for row in range(obs[1]):
-        for col in range(obs[2]):
-            m = model(out, labels=labels, sample=True)
-            out[:,:,row,col] = sample_op(m[:,:,row,col])
+    with torch.no_grad():
+        for row in range(obs[1]):
+            for col in range(obs[2]):
+                m = model(out, labels=labels, sample=True)
+                out[:,:,row,col] = sample_op(m)[:,:,row,col]
 
     return out
             
