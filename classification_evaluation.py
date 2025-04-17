@@ -29,8 +29,9 @@ def get_label(model, model_input, device):
 
     with torch.no_grad():
         logits = model(model_input)
+        log_likelihood = -1*discretized_mix_logistic_loss(model_input, logits)
 
-    answer = torch.argmax(logits, dim=1)
+    answer = my_bidict[torch.argmax(log_likelihood).item()]
     return answer
 # End of your code
 
