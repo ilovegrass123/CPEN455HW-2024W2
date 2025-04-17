@@ -191,6 +191,7 @@ def sample_conditional(model, sample_batch_size, obs, sample_op, labels): # keep
     out = torch.zeros(sample_batch_size, *obs, device=next(model.parameters()).device)
 
     with torch.no_grad():
+        model.eval()
         for row in range(obs[1]):
             for col in range(obs[2]):
                 m = model(out, labels=labels, sample=True)
