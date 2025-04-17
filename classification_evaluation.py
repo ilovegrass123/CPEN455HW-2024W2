@@ -75,8 +75,7 @@ if __name__ == '__main__':
 
     #TODO:Begin of your code
     #You should replace the random classifier with your trained model
-    model = PixelCNN(nr_resnet=5, nr_filters=40, input_channels=3, nr_logistic_mix=5).to(device)
-    # model.load_state_dict(torch.load("models/pcnn_cpen455_from_scratch_49.pth"))
+    model = PixelCNN().to(device)
     #End of your code
     
     model = model.to(device)

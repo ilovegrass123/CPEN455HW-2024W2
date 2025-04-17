@@ -76,8 +76,8 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--nr_logistic_mix', type=int, default=5,
                         help='Number of logistic components in the mixture. Higher = more flexible model')
     parser.add_argument('-l', '--lr', type=float,
-                        default=0.0001, help='Base learning rate')
-    parser.add_argument('-e', '--lr_decay', type=float, default=0.999995,
+                        default=0.0002, help='Base learning rate')
+    parser.add_argument('-e', '--lr_decay', type=float, default=0.5,
                         help='Learning rate decay, applied every step of the optimization')
     parser.add_argument('-b', '--batch_size', type=int, default=64,
                         help='Batch size during training per GPU')
