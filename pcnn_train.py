@@ -23,11 +23,10 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
         
     deno =  args.batch_size * np.prod(args.obs) * np.log(2.)        
     loss_tracker = mean_tracker()
-    
 
-    for batch_idx, item in enumerate(tqdm(data_loader)):
+    for batch_idx, (x, labels) in enumerate(tqdm(data_loader)):
 
-        model_input, labels = item
+        model_input, labels = x, labels
         model_input = model_input.to(device)
         model_output = model(model_input, labels=labels)
         loss = loss_op(model_input, model_output)
@@ -36,6 +35,7 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
         
     if args.en_wandb:
         wandb.log({mode + "-Average-BPD" : loss_tracker.get_mean()})
@@ -69,11 +69,11 @@ if __name__ == '__main__':
                         help='Observation shape')
     
     # model
-    parser.add_argument('-q', '--nr_resnet', type=int, default=1,
+    parser.add_argument('-q', '--nr_resnet', type=int, default=6,
                         help='Number of residual blocks per stage of the model')
-    parser.add_argument('-n', '--nr_filters', type=int, default=40,
+    parser.add_argument('-n', '--nr_filters', type=int, default=128,
                         help='Number of filters to use across the model. Higher = larger model.')
-    parser.add_argument('-m', '--nr_logistic_mix', type=int, default=5,
+    parser.add_argument('-m', '--nr_logistic_mix', type=int, default=10,
                         help='Number of logistic components in the mixture. Higher = more flexible model')
     parser.add_argument('-l', '--lr', type=float,
                         default=0.0002, help='Base learning rate')
@@ -191,8 +191,8 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(args.load_params))
         print('model parameters loaded')
 
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=args.lr_decay)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=400)
     
     for epoch in tqdm(range(args.max_epochs)):
         train_or_test(model = model, 
@@ -206,14 +206,14 @@ if __name__ == '__main__':
         
         # decrease learning rate
         scheduler.step()
-        train_or_test(model = model,
-                      data_loader = test_loader,
-                      optimizer = optimizer,
-                      loss_op = loss_op,
-                      device = device,
-                      args = args,
-                      epoch = epoch,
-                      mode = 'test')
+        # train_or_test(model = model,
+        #               data_loader = test_loader,
+        #               optimizer = optimizer,
+        #               loss_op = loss_op,
+        #               device = device,
+        #               args = args,
+        #               epoch = epoch,
+        #               mode = 'test')
         
         train_or_test(model = model,
                       data_loader = val_loader,
@@ -239,12 +239,19 @@ if __name__ == '__main__':
             
             gen_data_dir = args.sample_dir
             ref_data_dir = args.data_dir +'/test'
+            print("gen_data: {}, ref_data: {}".format(gen_data_dir, ref_data_dir))
             paths = [gen_data_dir, ref_data_dir]
-            try:
-                fid_score = calculate_fid_given_paths(paths, 32, device, dims=192)
-                print("Dimension {:d} works! fid score: {}".format(192, fid_score))
-            except:
-                print("Dimension {:d} fails!".format(192))
+            for attempts in range(3):
+                try:
+                    fid_score = calculate_fid_given_paths(paths, 32, device, dims=192)
+                    print("Dimension {:d} works! fid score: {}".format(192, fid_score))
+                    break
+                except Exception as e:
+                    print(e)
+                    print("Dimension {:d} fails!".format(192))
+                    if attempts == 2:
+                        fid_score = None
+
                 
             if args.en_wandb:
                 wandb.log({"samples": sample_result,
@@ -254,3 +261,8 @@ if __name__ == '__main__':
             if not os.path.exists("models"):
                 os.makedirs("models")
             torch.save(model.state_dict(), 'models/{}_{}.pth'.format(model_name, epoch))
+            wandb_log = wandb.Artifact("pixelcnn-model", type="model")
+            wandb_log.add_file('models/{}_{}.pth'.format(model_name, epoch))
+            wandb.log_artifact(wandb_log)
+            print("saved a model")
+            
