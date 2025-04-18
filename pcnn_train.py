@@ -234,7 +234,7 @@ if __name__ == '__main__':
                 labels = torch.full((args.sample_batch_size,), label, device=device)
                 sample_t = sample_conditional(model, args.sample_batch_size, args.obs, sample_op, labels)
                 sample_t = rescaling_inv(sample_t)
-                save_images(sample_t, os.path.join(args.sample_dir, f"class_{label}"))
+                save_images(sample_t, args.sample_dir)
                 sample_result = wandb.Image(sample_t, caption="epoch {}".format(epoch))
             
             gen_data_dir = args.sample_dir
